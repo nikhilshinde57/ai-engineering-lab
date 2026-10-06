@@ -19,6 +19,23 @@ the shoes, and is the hat in stock?" needs zero, one, or two tool calls — the 
 that out at runtime, and `agent.py` just keeps running the loop until the model says it's
 done (or `MAX_STEPS` is hit).
 
+## Architecture
+
+```mermaid
+flowchart LR
+    UI[app.py<br/>Gradio ChatInterface] --> AG[agent.py<br/>tool-calling loop]
+    AG --> LC[llm_client.py<br/>OpenAI-compatible client]
+    AG --> TL[get_price / check_stock]
+    LC --> AG
+    TL --> AG
+    AG --> UI
+```
+
+`app.py` owns the UI and chat history; it just calls `agent()` with the new message and
+the history so far. `agent.py` owns the loop and the tool registry; it calls out to
+`llm_client.py` for the model and to the tool functions directly. No component reaches
+past the one next to it — `app.py` never calls a tool or the LLM client directly.
+
 ## The loop
 
 ```mermaid
@@ -57,6 +74,23 @@ To run the LangChain summarizer chain standalone instead:
 ```bash
 python summarizer_langchain.py
 ```
+
+## Try it
+
+The catalog (`PRICES` / `STOCK` in `agent.py`) has: shoes (₹799, 12 in stock), hat (₹399,
+out of stock), bag (₹1420, 5 in stock), shorts (₹1299, 3 in stock), pants (₹1699, out of
+stock). Watch the terminal while you chat — each tool call prints
+`🔧 tool called: get_price(...)` or `🔧 tool called: check_stock(...)` the instant the
+model decides to use it.
+
+| Ask | What happens |
+|-----|--------------|
+| "Hi! What can you help with?" | No tool call — small talk is answered directly from the system prompt. |
+| "How much are the shoes?" | One `get_price("shoes")` call → answers ₹799. |
+| "Is the hat in stock?" | One `check_stock("hat")` call → answers out of stock. |
+| "What's the price of the bag, and is it in stock?" | Two tool calls in the same turn — `get_price("bag")` and `check_stock("bag")` — before answering ₹1420, 5 left. |
+| "Is the hat in stock? If not, what about the bag?" | Two *sequential* rounds — `check_stock("hat")` comes back empty, which is what makes the model call `check_stock("bag")` next. This is the case a single-pass (call-model-once) version can't handle. |
+| "How much are the earrings?" | `get_price("earrings")` is still called, returns "unknown item" (not in the dict), and the model relays that rather than guessing a price. |
 
 ## Design decisions
 
