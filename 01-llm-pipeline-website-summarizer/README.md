@@ -20,15 +20,15 @@ flowchart LR
 ## Setup and run
 
 ```bash
-cd 01-website-summarizer
-python -m venv .venv
+# from the repo root (shared venv and .env — see the root README)
+python3 -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r 01-llm-pipeline-website-summarizer/requirements.txt
 
-pip install -r requirements.txt
-
-cp .env.example .env
+cp 01-llm-pipeline-website-summarizer/.env.example .env    # skip if you already have a root .env
 # edit .env: set LLM_PROVIDER and the API key for that provider
 
+cd 01-llm-pipeline-website-summarizer
 python app.py
 ```
 

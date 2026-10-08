@@ -8,7 +8,7 @@ different ways.
 
 ## Why this is an agent, not a pipeline
 
-Project 01 (`website-summarizer`) is a **pipeline**: scrape → build prompt → call LLM →
+Project 01 (`llm-pipeline-website-summarizer`) is a **pipeline**: scrape → build prompt → call LLM →
 show result. The steps and their order are fixed in code; the LLM only ever fills in the
 last blank.
 
@@ -54,15 +54,15 @@ tool results so far) back to the model. The model either returns a tool call, wh
 ## Setup and run
 
 ```bash
-cd 02-shop-agent
-python -m venv .venv
+# from the repo root (shared venv and .env — see the root README)
+python3 -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r 02-agent-shop-assistant/requirements.txt
 
-pip install -r requirements.txt
-
-cp .env.example .env
+cp 02-agent-shop-assistant/.env.example .env    # skip if you already have a root .env
 # edit .env: set LLM_PROVIDER and the API key for that provider
 
+cd 02-agent-shop-assistant
 python app.py
 ```
 

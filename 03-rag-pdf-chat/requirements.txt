@@ -1,0 +1,8 @@
+openai
+python-dotenv
+gradio
+pypdf
+numpy
+langchain-core
+langchain-openai
+langchain-text-splitters
